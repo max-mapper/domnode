@@ -17,7 +17,12 @@ currently it is uses the [plates](https://github.com/flatiron/plates) templating
     var readStream = new stream.Stream()
     readStream.readable = true
     readStream.pipe(list)
-    
+    readStream.write = function (data) {
+      this.emit('data', data); return true
+    }
+    readStream.end = function (data) {
+      this.emit('end')
+    }
     // adds <div id="number">1</div>,
     //      <div id="number">2</div>
     //  and <div id="number">2</div>
