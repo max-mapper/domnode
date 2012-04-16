@@ -1,7 +1,26 @@
 {
-  "name": "dominode",
-  "version": "0.0.1",
-  "dependencies": {
-    "plates": "0.4.6"
-  }
+    "name" : "dominode.js",
+    "description" : "node style streams for the DOM",
+    "version" : "0.0.1",
+    "repository" : {
+        "type" : "git",
+        "url" : "git://github.com/maxogden/dominode.git"
+    },
+    "keywords" : [
+        "templating",
+        "dom",
+        "stream",
+        "mvc",
+        "framework",
+        "pipe"
+    ],
+    "dependencies": {
+      "plates": "0.4.6"
+    },
+    "license" : "MIT",
+    "author" : {
+        "name" : "Max Ogden",
+        "email" : "max@maxogden.com",
+        "url" : "http://maxogden.com"
+    }
 }
