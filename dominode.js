@@ -2,6 +2,8 @@ var stream = require('stream')
 var util = require('util')
 var plates = require('plates')
 
+// selector: location in the dom where this should render to
+// template: raw string template that should be combined with data and rendered
 function Dominode(selector, template) {
   var me = this
   stream.Stream.call(me)
@@ -12,11 +14,16 @@ function Dominode(selector, template) {
 
 util.inherits(Dominode, stream.Stream)
 
-Dominode.prototype.write = function (data) {
-  var compiled = plates.bind(this.template, data)
+// similar to jQuery DOM compilation e.g. $('<div>')
+Dominode.prototype.renderFragment = function(html) {
   var range = document.createRange()
   range.selectNode(document.body)
-  var text = range.createContextualFragment(compiled)
+  return range.createContextualFragment(html)
+}
+
+Dominode.prototype.write = function(data) {
+  var compiled = plates.bind(this.template, data)
+  var text = this.renderFragment(compiled)
   this.selector.appendChild(text)
 }
 
