@@ -1,0 +1,7 @@
+{
+  "name": "dominode",
+  "version": "0.0.1",
+  "dependencies": {
+    "plates": "0.4.6"
+  }
+}

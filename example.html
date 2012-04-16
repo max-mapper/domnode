@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <script src="bundle.js"></script>
+    <script src="dominode.js"></script>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        function ExampleReadStream() {
+          stream.Stream.call(this)
+          var me = this
+          
+          var n = 10
+          var iv = setInterval(function () {
+            me.emit('data', {number: n})
+            if (--n === 0) {
+              clearInterval(iv)
+              me.emit('end')
+            }
+          }, 250)
+        }
+        util.inherits(ExampleReadStream, stream.Stream)
+        
+        var list = dominode('.list', '<div id="number"></div>')
+        var readStream = new ExampleReadStream()
+        readStream.pipe(list)
+      })
+    </script>
+  </head>
+  <body>
+    <div class="list"></div>
+  </body>
+</html>
