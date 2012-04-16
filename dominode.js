@@ -21,6 +21,7 @@ Dominode.prototype.renderFragment = function(html) {
   return range.createContextualFragment(html)
 }
 
+// writable streams must implement write and end functions
 Dominode.prototype.write = function(data) {
   var compiled = plates.bind(this.template, data)
   var text = this.renderFragment(compiled)
