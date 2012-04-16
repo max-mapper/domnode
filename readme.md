@@ -17,13 +17,18 @@ currently it is uses the [plates](https://github.com/flatiron/plates) templating
     var readStream = new stream.Stream()
     readStream.readable = true
     readStream.pipe(list)
-    
+    readStream.write = function (data) {
+      this.emit('data', data); return true
+    }
+    readStream.end = function (data) {
+      this.emit('end')
+    }
     // adds <div id="number">1</div>,
     //      <div id="number">2</div>
     //  and <div id="number">2</div>
     /    to <div class="list"></div>
-    readStream.emit({number: 1})
-    readStream.emit({number: 2})
-    readStream.emit({number: 3})
+    readStream.write({number: 1})
+    readStream.write({number: 2})
+    readStream.write({number: 3})
 
 MIT LICENSE
