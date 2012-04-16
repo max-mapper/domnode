@@ -14,7 +14,16 @@ currently it is uses the [plates](https://github.com/flatiron/plates) templating
     var list = dominode('.list', '<div id="number"></div>')
     
     // pipe some data to your dominode
-    var readStream = new ExampleReadStream()
+    var readStream = new stream.Stream()
+    readStream.readable = true
     readStream.pipe(list)
+    
+    // adds <div id="number">1</div>,
+    //      <div id="number">2</div>
+    //  and <div id="number">2</div>
+    /    to <div class="list"></div>
+    readStream.emit({number: 1})
+    readStream.emit({number: 2})
+    readStream.emit({number: 3})
 
 MIT LICENSE
