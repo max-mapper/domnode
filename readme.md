@@ -60,7 +60,8 @@ currently dominode is using the [plates](https://github.com/flatiron/plates) tem
    - FileReader
    - webworkers
    - webRTC
- - show examples using popular templating libraries
- - show examples using MVVM style "cascading dominodes" (the pun is strong with this one)
+   - mouse/touch events
+ - examples using a few different templating libraries
+ - examples using MVVM style "cascading dominodes" (the pun is strong with this one)
 
 MIT LICENSE
