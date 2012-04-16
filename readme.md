@@ -22,8 +22,8 @@ currently it is uses the [plates](https://github.com/flatiron/plates) templating
     //      <div id="number">2</div>
     //  and <div id="number">2</div>
     /    to <div class="list"></div>
-    readStream.emit({number: 1})
-    readStream.emit({number: 2})
-    readStream.emit({number: 3})
+    readStream.write({number: 1})
+    readStream.write({number: 2})
+    readStream.write({number: 3})
 
 MIT LICENSE
