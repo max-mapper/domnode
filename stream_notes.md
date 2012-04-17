@@ -42,7 +42,7 @@ then emit drain when ready
     readstream.readable = true
     
     readstream.on('data', function(data) {
-      var ready = writestream.bind(writestream)
+      var ready = writestream.write(data)
       if (ready === false) {
         this.pause()
         writestream.once('drain', this.resume.bind(this))
