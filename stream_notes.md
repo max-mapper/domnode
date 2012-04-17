@@ -1,4 +1,4 @@
-notes on node streams from a discussion with @isz about them
+notes on node streams from a discussion with @izs about them
 
 # readable
 
