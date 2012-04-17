@@ -45,7 +45,7 @@ currently dominode is using the [plates](https://github.com/flatiron/plates) tem
     }
     // adds <div id="number">1</div>,
     //      <div id="number">2</div>
-    //  and <div id="number">2</div>
+    //  and <div id="number">3</div>
     /    to <div class="list"></div>
     readStream.write({number: 1})
     readStream.write({number: 2})
