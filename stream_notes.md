@@ -3,6 +3,7 @@ notes on node streams from a discussion with @izs about them
 # readable
 
 .pause() emits pause (advisory)
+
 .resume() emits resume
 
 # writable
@@ -13,7 +14,9 @@ then emit drain when ready
 # closing streams
 
 .destroy implies a forceful end to a stream
+
 .close implies 'end once all the current stuff has been written'
+
 .destroySoon should really be .close
 
 # simplified writable stream
