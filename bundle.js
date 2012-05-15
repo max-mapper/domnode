@@ -351,7 +351,7 @@ var EventEmitter = exports.EventEmitter = process.EventEmitter;
 var isArray = typeof Array.isArray === 'function'
     ? Array.isArray
     : function (xs) {
-        return Object.toString.call(xs) === '[object Array]'
+        return Object.prototype.toString.call(xs) === '[object Array]'
     }
 ;
 
@@ -1656,6 +1656,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 require.define("assert", function (require, module, exports, __dirname, __filename) {
 // UTILITY
 var util = require('util');
+var Buffer = require("buffer").Buffer;
 var pSlice = Array.prototype.slice;
 
 // 1. The assert module provides functions that throw
@@ -2486,397 +2487,460 @@ Stream.prototype.pipe = function(dest, options) {
 
 });
 
-require.define("/node_modules/plates/package.json", function (require, module, exports, __dirname, __filename) {
-module.exports = {"main":"./lib/plates.js"}
+require.define("/node_modules/mustache/package.json", function (require, module, exports, __dirname, __filename) {
+module.exports = {"main":"./mustache"}
 });
 
-require.define("/node_modules/plates/lib/plates.js", function (require, module, exports, __dirname, __filename) {
-var Plates = (typeof process !== 'undefined' && typeof process.title !== 'undefined') ? exports : {};
+require.define("/node_modules/mustache/mustache.js", function (require, module, exports, __dirname, __filename) {
+/*
+ * CommonJS-compatible mustache.js module
+ *
+ * See http://github.com/janl/mustache.js for more info.
+ */
 
-!function(exports) {
+/*
+  mustache.js — Logic-less templates in JavaScript
 
-  var _toString = Object.prototype.toString,
-      isArray = Array.isArray || function (o) {
-        return _toString.call(o) === "[object Array]";
-      };
+  See http://mustache.github.com/ for more info.
+*/
 
-  var Merge = function Merge() {};
+var Mustache = function () {
+  var _toString = Object.prototype.toString;
 
-  Merge.prototype = {
+  Array.isArray = Array.isArray || function (obj) {
+    return _toString.call(obj) == "[object Array]";
+  }
 
-    nest: [],
+  var _trim = String.prototype.trim, trim;
 
-    tag: new RegExp([
-      '<',
-      '(/?)', // 2 - is closing
-      '([-:\\w]+)', // 3 - name
-      '((?:[-\\w]+(?:', '=',
-      '(?:\\w+|["|\'](?:.*)["|\']))?)*)', // 4 - attributes
-      '(/?)', // 5 - is self-closing
-      '>'
-    ].join('\\s*')),
+  if (_trim) {
+    trim = function (text) {
+      return text == null ? "" : _trim.call(text);
+    }
+  } else {
+    var trimLeft, trimRight;
 
-    attr: /([\-\w]*)=(?:["\']([\-\.\w\s\/:;&#]*)["\'])/gi,
+    // IE doesn't match non-breaking spaces with \s.
+    if ((/\S/).test("\xA0")) {
+      trimLeft = /^[\s\xA0]+/;
+      trimRight = /[\s\xA0]+$/;
+    } else {
+      trimLeft = /^\s+/;
+      trimRight = /\s+$/;
+    }
 
-    hasClass: function(str, className) {
-      return str.split(' ').indexOf(className) > -1;
+    trim = function (text) {
+      return text == null ? "" :
+        text.toString().replace(trimLeft, "").replace(trimRight, "");
+    }
+  }
+
+  var escapeMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+
+  function escapeHTML(string) {
+    return String(string).replace(/&(?!\w+;)|[<>"']/g, function (s) {
+      return escapeMap[s] || s;
+    });
+  }
+
+  var regexCache = {};
+  var Renderer = function () {};
+
+  Renderer.prototype = {
+    otag: "{{",
+    ctag: "}}",
+    pragmas: {},
+    buffer: [],
+    pragmas_implemented: {
+      "IMPLICIT-ITERATOR": true
+    },
+    context: {},
+
+    render: function (template, context, partials, in_recursion) {
+      // reset buffer & set context
+      if (!in_recursion) {
+        this.context = context;
+        this.buffer = []; // TODO: make this non-lazy
+      }
+
+      // fail fast
+      if (!this.includes("", template)) {
+        if (in_recursion) {
+          return template;
+        } else {
+          this.send(template);
+          return;
+        }
+      }
+
+      // get the pragmas together
+      template = this.render_pragmas(template);
+
+      // render the template
+      var html = this.render_section(template, context, partials);
+
+      // render_section did not find any sections, we still need to render the tags
+      if (html === false) {
+        html = this.render_tags(template, context, partials, in_recursion);
+      }
+
+      if (in_recursion) {
+        return html;
+      } else {
+        this.sendLines(html);
+      }
     },
 
-    iterate: function(html, value, components, tagname, key) {
-
-      var output  = '',
-          segment = html.slice(
-            html.search(components.input),
-            html.lastIndexOf(tagname) + tagname.length + 1
-          ),
-
-          data = {};
-
-      // Is it an array?
-      if (isArray(value)) {
-
-        // Yes: set the output to the result of iterating through the array
-        for (var i = 0, l = value.length; i < l; i++) {
-
-          // If there is a key, then we have a simple object and
-          // must construct a simple object to use as the data
-          if (key) {
-            data[key] = value[i];
-          } else {
-            data = value[i];
-          }
-
-          output += this.bind(segment, data);
-
-        }
-
-        return output;
-
+    /*
+      Sends parsed lines
+    */
+    send: function (line) {
+      if (line !== "") {
+        this.buffer.push(line);
       }
-
-      // Is it an object?
-      else if (typeof value === 'object') {
-
-        // We need to refine the selection now that we know we're dealing with a
-        // nested object
-        segment = segment.slice(components.input.length, -(tagname.length + 3));
-        return output += this.bind(segment, value);
-
-      }
-
-      return value;
-
     },
 
-    bind: function bind(html, data, map) {
-
-      if (isArray(data)) {
-        var output = '';
-        for (var i = 0, l = data.length; i<l; i++) {
-          output += this.bind(html, data[i], map);
+    sendLines: function (text) {
+      if (text) {
+        var lines = text.split("\n");
+        for (var i = 0; i < lines.length; i++) {
+          this.send(lines[i]);
         }
-        return output;
+      }
+    },
+
+    /*
+      Looks for %PRAGMAS
+    */
+    render_pragmas: function (template) {
+      // no pragmas
+      if (!this.includes("%", template)) {
+        return template;
       }
 
-      html = html || '';
-      data = data || {};
+      var that = this;
+      var regex = this.getCachedRegex("render_pragmas", function (otag, ctag) {
+        return new RegExp(otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" + ctag, "g");
+      });
+
+      return template.replace(regex, function (match, pragma, options) {
+        if (!that.pragmas_implemented[pragma]) {
+          throw({message:
+            "This implementation of mustache doesn't understand the '" +
+            pragma + "' pragma"});
+        }
+        that.pragmas[pragma] = {};
+        if (options) {
+          var opts = options.split("=");
+          that.pragmas[pragma][opts[0]] = opts[1];
+        }
+        return "";
+        // ignore unknown pragmas silently
+      });
+    },
+
+    /*
+      Tries to find a partial in the curent scope and render it
+    */
+    render_partial: function (name, context, partials) {
+      name = trim(name);
+      if (!partials || partials[name] === undefined) {
+        throw({message: "unknown_partial '" + name + "'"});
+      }
+      if (!context || typeof context[name] != "object") {
+        return this.render(partials[name], context, partials, true);
+      }
+      return this.render(partials[name], context[name], partials, true);
+    },
+
+    /*
+      Renders inverted (^) and normal (#) sections
+    */
+    render_section: function (template, context, partials) {
+      if (!this.includes("#", template) && !this.includes("^", template)) {
+        // did not render anything, there were no sections
+        return false;
+      }
 
       var that = this;
 
-      var openers = 0,
-          components,
-          attributes,
-          mappings = map && map.mappings,
-          intag = false,
-          tagname = '',
-          isClosing = false,
-          isSelfClosing = false,
-          matchmode = false,
-          createAttribute = map && map.conf && map.conf.create,
-          closing,
-          tagbody;
+      var regex = this.getCachedRegex("render_section", function (otag, ctag) {
+        // This regex matches _the first_ section ({{#foo}}{{/foo}}), and captures the remainder
+        return new RegExp(
+          "^([\\s\\S]*?)" +         // all the crap at the beginning that is not {{*}} ($1)
 
-      var c,
-          buffer = '',
-          left;
+          otag +                    // {{
+          "(\\^|\\#)\\s*(.+)\\s*" + //  #foo (# == $2, foo == $3)
+          ctag +                    // }}
 
-      for (var i = 0, l = html.length; i < l; i++) {
-        c = html[i];
+          "\n*([\\s\\S]*?)" +       // between the tag ($2). leading newlines are dropped
 
-        if (c === '!' && intag && !matchmode) {
-          intag = false;
-          buffer += html.slice(left, i+1);
-        }
-        else if (c === '<' && !intag) {
-          closing = true;
-          intag = true;
-          left = i;
-        }
-        else if (c === '>' && intag) {
+          otag +                    // {{
+          "\\/\\s*\\3\\s*" +        //  /foo (backreference to the opening tag).
+          ctag +                    // }}
 
-          intag = false;
-          tagbody = html.slice(left, i+1);
-          components = this.tag.exec(tagbody);
+          "\\s*([\\s\\S]*)$",       // everything else in the string ($4). leading whitespace is dropped.
 
-          if(!components) {
-            intag = true;
-            continue;
+        "g");
+      });
+
+
+      // for each {{#foo}}{{/foo}} section do...
+      return template.replace(regex, function (match, before, type, name, content, after) {
+        // before contains only tags, no sections
+        var renderedBefore = before ? that.render_tags(before, context, partials, true) : "",
+
+        // after may contain both sections and tags, so use full rendering function
+            renderedAfter = after ? that.render(after, context, partials, true) : "",
+
+        // will be computed below
+            renderedContent,
+
+            value = that.find(name, context);
+
+        if (type === "^") { // inverted section
+          if (!value || Array.isArray(value) && value.length === 0) {
+            // false or empty list, render it
+            renderedContent = that.render(content, context, partials, true);
+          } else {
+            renderedContent = "";
           }
-
-          isClosing = components[1];
-          tagname = components[2];
-          attributes = components[3];
-          isSelfClosing = components[4];
-
-          if (matchmode) {
-
-            //
-            // and its a closing.
-            //
-            if (!!isClosing) {
-
-              if (openers <= 0) {
-                matchmode = false;
-              }
-              else {
-                --openers;
-              }
-            }
-            //
-            // and its not a self-closing tag
-            //
-            else if (!isSelfClosing) {
-              ++openers;
-            }
+        } else if (type === "#") { // normal section
+          if (Array.isArray(value)) { // Enumerable, Let's loop!
+            renderedContent = that.map(value, function (row) {
+              return that.render(content, that.create_context(row), partials, true);
+            }).join("");
+          } else if (that.is_object(value)) { // Object, Use it as subcontext!
+            renderedContent = that.render(content, that.create_context(value),
+              partials, true);
+          } else if (typeof value == "function") {
+            // higher order section
+            renderedContent = value.call(context, content, function (text) {
+              return that.render(text, context, partials, true);
+            });
+          } else if (value) { // boolean section
+            renderedContent = that.render(content, context, partials, true);
+          } else {
+            renderedContent = "";
           }
-
-          if (!isClosing && !matchmode) {
-
-            //
-            // if there is a match in progress and
-            //
-            if (mappings && mappings.length > 0) {
-
-              for (var ii = mappings.length - 1; ii >= 0; ii--) {
-
-                var setAttribute = false
-                  , shouldSetAttribute = mappings[ii].re && attributes.match(mappings[ii].re);
-
-                tagbody = tagbody.replace(this.attr, function(str, key, value, a) {
-
-                  var newdata = mappings[ii].dataKey ? data[mappings[ii].dataKey] : data[key];
-
-                  if (shouldSetAttribute && mappings[ii].replace !== key) {
-
-                    return str;
-                  }
-                  else if (shouldSetAttribute || typeof mappings[ii].replacePartial1 !== 'undefined') {
-
-                    setAttribute = true;
-
-                    //
-                    // determine if we should use the replace argument or some value from the data object.
-                    //
-                    if (typeof mappings[ii].replacePartial2 !== 'undefined') {
-                      newdata = value.replace(mappings[ii].replacePartial1, mappings[ii].replacePartial2);
-                    }
-                    else if (typeof mappings[ii].replacePartial1 !== 'undefined' && mappings[ii].dataKey) {
-
-                      newdata = value.replace(mappings[ii].replacePartial1, data[mappings[ii].dataKey]);
-                    }
-
-                    return key + '="' + (newdata || '') + '"';
-                  }
-                  else if (!mappings[ii].replace && mappings[ii].attribute === key) {
-
-                    if (
-                      mappings[ii].value === value || 
-                      that.hasClass(value, mappings[ii].value || 
-                      mappings.conf.where === key) ||
-                      ( ({}).toString.call(mappings[ii].value) === '[object RegExp]' && 
-                        mappings[ii].value.exec(value) !== null) ) {
-
-                      var v = data[mappings[ii].dataKey];
-
-                      newdata = tagbody + newdata;
-
-                      if (isArray(v)) {
-
-                        newdata = that.iterate(html, v, components, tagname, value);
-                        // If the item is an array, then we need to tell
-                        // Plates that we're dealing with nests
-                        that.nest.push(tagname);
-                      } 
-                      else if (typeof v === 'object') {
-
-                        newdata = tagbody + that.iterate(html, v, components, tagname, value);
-                      }
-
-                      buffer += newdata || '';
-                      matchmode = true;
-                    }
-                  }
-                  return str;
-                });
-
-                if (createAttribute && shouldSetAttribute && !setAttribute) {
-                  var spliced = isSelfClosing? 2 : 1;
-                  var close = isSelfClosing? '/>': '>';
-                  var left = tagbody.substr(0, tagbody.length - spliced);
-                  if (left[left.length - 1] == ' ') {
-                    left = left.substr(0, left.length - 1);
-                    if (isSelfClosing) {
-                      close = ' ' + close;
-                    }
-                  }
-                  tagbody = [
-                    left,
-                    ' ',
-                    mappings[ii].replace,
-                    '="',
-                    data[mappings[ii].dataKey],
-                    '"',
-                    close
-                  ].join('');
-                }
-
-              }
-            }
-            else {
-
-              //
-              // if there is no map, we are just looking to match
-              // the specified id to a data key in the data object.
-              //
-              tagbody.replace(
-                this.attr,
-                function (attr, key, value, idx) {
-                  if (key === map && map.conf.where || 'id' && data[value]) {
-
-                    var v      = data[value],
-                        nest = isArray(v),
-                        output = (nest || typeof v === 'object') ? that.iterate(html, v, components, tagname, value) : v;
-
-                    // If the item is an array, then we need to tell
-                    // Plates that we're dealing with nests
-                    if (nest) { that.nest.push(tagname); }
-
-                    buffer += nest ? output : tagbody + output;
-                    matchmode = true;
-                  }
-                }
-              );
-            }
-          }
-
-          //
-          // if there is currently no match in progress
-          // just write the tagbody to the buffer.
-          //
-          if (!matchmode && that.nest.length === 0) {
-            buffer += tagbody;
-          } else if (!matchmode && that.nest.length) {
-              this.nest.pop();
-          }
-
-        }
-        else if (!intag && !matchmode) {
-
-          //
-          // currently not inside a tag and there is no
-          // match in progress, we can write the char to
-          // the buffer.
-          //
-          buffer += c;
         }
 
+        return renderedBefore + renderedContent + renderedAfter;
+      });
+    },
+
+    /*
+      Replace {{foo}} and friends with values from our view
+    */
+    render_tags: function (template, context, partials, in_recursion) {
+      // tit for tat
+      var that = this;
+
+      var new_regex = function () {
+        return that.getCachedRegex("render_tags", function (otag, ctag) {
+          return new RegExp(otag + "(=|!|>|&|\\{|%)?([^#\\^]+?)\\1?" + ctag + "+", "g");
+        });
+      };
+
+      var regex = new_regex();
+      var tag_replace_callback = function (match, operator, name) {
+        switch(operator) {
+        case "!": // ignore comments
+          return "";
+        case "=": // set new delimiters, rebuild the replace regexp
+          that.set_delimiters(name);
+          regex = new_regex();
+          return "";
+        case ">": // render partial
+          return that.render_partial(name, context, partials);
+        case "{": // the triple mustache is unescaped
+        case "&": // & operator is an alternative unescape method
+          return that.find(name, context);
+        default: // escape the value
+          return escapeHTML(that.find(name, context));
+        }
+      };
+      var lines = template.split("\n");
+      for(var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].replace(regex, tag_replace_callback, this);
+        if (!in_recursion) {
+          this.send(lines[i]);
+        }
       }
-      return buffer;
-    }
 
+      if (in_recursion) {
+        return lines.join("\n");
+      }
+    },
+
+    set_delimiters: function (delimiters) {
+      var dels = delimiters.split(" ");
+      this.otag = this.escape_regex(dels[0]);
+      this.ctag = this.escape_regex(dels[1]);
+    },
+
+    escape_regex: function (text) {
+      // thank you Simon Willison
+      if (!arguments.callee.sRE) {
+        var specials = [
+          '/', '.', '*', '+', '?', '|',
+          '(', ')', '[', ']', '{', '}', '\\'
+        ];
+        arguments.callee.sRE = new RegExp(
+          '(\\' + specials.join('|\\') + ')', 'g'
+        );
+      }
+      return text.replace(arguments.callee.sRE, '\\$1');
+    },
+
+    /*
+      find `name` in current `context`. That is find me a value
+      from the view object
+    */
+    find: function (name, context) {
+      name = trim(name);
+
+      // Checks whether a value is thruthy or false or 0
+      function is_kinda_truthy(bool) {
+        return bool === false || bool === 0 || bool;
+      }
+
+      var value;
+
+      // check for dot notation eg. foo.bar
+      if (name.match(/([a-z_]+)\./ig)) {
+        var childValue = this.walk_context(name, context);
+        if (is_kinda_truthy(childValue)) {
+          value = childValue;
+        }
+      } else {
+        if (is_kinda_truthy(context[name])) {
+          value = context[name];
+        } else if (is_kinda_truthy(this.context[name])) {
+          value = this.context[name];
+        }
+      }
+
+      if (typeof value == "function") {
+        return value.apply(context);
+      }
+      if (value !== undefined) {
+        return value;
+      }
+      // silently ignore unkown variables
+      return "";
+    },
+
+    walk_context: function (name, context) {
+      var path = name.split('.');
+      // if the var doesn't exist in current context, check the top level context
+      var value_context = (context[path[0]] != undefined) ? context : this.context;
+      var value = value_context[path.shift()];
+      while (value != undefined && path.length > 0) {
+        value_context = value;
+        value = value[path.shift()];
+      }
+      // if the value is a function, call it, binding the correct context
+      if (typeof value == "function") {
+        return value.apply(value_context);
+      }
+      return value;
+    },
+
+    // Utility methods
+
+    /* includes tag */
+    includes: function (needle, haystack) {
+      return haystack.indexOf(this.otag + needle) != -1;
+    },
+
+    // by @langalex, support for arrays of strings
+    create_context: function (_context) {
+      if (this.is_object(_context)) {
+        return _context;
+      } else {
+        var iterator = ".";
+        if (this.pragmas["IMPLICIT-ITERATOR"]) {
+          iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator;
+        }
+        var ctx = {};
+        ctx[iterator] = _context;
+        return ctx;
+      }
+    },
+
+    is_object: function (a) {
+      return a && typeof a == "object";
+    },
+
+    /*
+      Why, why, why? Because IE. Cry, cry cry.
+    */
+    map: function (array, fn) {
+      if (typeof array.map == "function") {
+        return array.map(fn);
+      } else {
+        var r = [];
+        var l = array.length;
+        for(var i = 0; i < l; i++) {
+          r.push(fn(array[i]));
+        }
+        return r;
+      }
+    },
+
+    getCachedRegex: function (name, generator) {
+      var byOtag = regexCache[this.otag];
+      if (!byOtag) {
+        byOtag = regexCache[this.otag] = {};
+      }
+
+      var byCtag = byOtag[this.ctag];
+      if (!byCtag) {
+        byCtag = byOtag[this.ctag] = {};
+      }
+
+      var regex = byCtag[name];
+      if (!regex) {
+        regex = byCtag[name] = generator(this.otag, this.ctag);
+      }
+
+      return regex;
+    }
   };
 
-  var Mapper = function Mapper(conf) {
-    if (!(this instanceof Mapper)) { return new Mapper(conf); }
-    this.mappings = [];
-    this.conf = conf || {};
-  };
+  return({
+    name: "mustache.js",
+    version: "0.4.0",
 
-  function last(newitem) {
-    
-    if (newitem) {
-
-      this.mappings.push({});
+    /*
+      Turns a template and view into HTML
+    */
+    to_html: function (template, view, partials, send_fun) {
+      var renderer = new Renderer();
+      if (send_fun) {
+        renderer.send = send_fun;
+      }
+      renderer.render(template, view || {}, partials);
+      if (!send_fun) {
+        return renderer.buffer.join("\n");
+      }
     }
-    var m = this.mappings[this.mappings.length-1];
+  });
+}();
+if (typeof module !== 'undefined' && module.exports) {
+    exports.name = Mustache.name;
+    exports.version = Mustache.version;
 
-    if (m && m.attribute && m.value && m.dataKey && m.replace) {
-      m.re = new RegExp(m.attribute + '=([\'"]?)' + m.value + '\\1');
-    
-    } else {
-    
-      delete m && m.re;
-    }
-    return m;
-  }
-
-  Mapper.prototype = {
-    replace: function(val1, val2) {
-      var l = last.call(this);
-      l.replacePartial1 = val1;
-      l.replacePartial2 = val2;
-      return this;
-    },
-    use: function(val) {
-      last.call(this).dataKey = val;
-      return last.call(this) && this;
-    },
-    to: function(val) {
-      return this.use(val);
-    },
-    where: function(val) {
-      last.call(this, true).attribute = val;
-      return last.call(this) && this;
-    },
-
-    class: function(val) {
-      return this.where('class').is(val);
-    },
-    tag: function(val) {
-      last.call(this, true).tag = val;
-      return this;
-    },
-
-    is: function(val) {
-      last.call(this).value = val;
-      return last.call(this) && this;
-    },
-    has: function(val) {
-      last.call(this).value = val;
-      this.replace(val);
-      return last.call(this) && this;
-    },
-    insert: function(val) {
-      var l = last.call(this);
-      l.replace = l.attribute;
-      l.dataKey = val;
-      return last.call(this) && this;
-    },
-    as: function(val) {
-      last.call(this).replace = val;
-      return last.call(this) && this;
-    }
-  };
-
-  // where('class').is('foo').insert('bla')
-
-  exports.bind = function (html, data, map) {
-    var merge = new Merge();
-    return merge.bind(html, data, map);
-  };
-
-  exports.Map = Mapper;
-
-}(Plates);
+    exports.to_html = function() {
+      return Mustache.to_html.apply(this, arguments);
+    };
+}
 
 });

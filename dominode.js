@@ -1,6 +1,5 @@
 var stream = require('stream')
 var util = require('util')
-var plates = require('plates')
 
 // selector: location in the dom where this should render to
 // template: raw string template that should be combined with data and rendered
@@ -15,16 +14,22 @@ function Dominode(selector, template) {
 util.inherits(Dominode, stream.Stream)
 
 // similar to jQuery DOM compilation e.g. $('<div>')
-Dominode.prototype.renderFragment = function(html) {
+Dominode.prototype.createFragment = function(html) {
   var range = document.createRange()
   range.selectNode(document.body)
   return range.createContextualFragment(html)
 }
 
+// override if you want another templating engine
+Dominode.prototype.render = function(data) {
+  if (!this.mustache) this.mustache = require('mustache')
+  return this.mustache.to_html(this.template, data)
+}
+
 // writable streams must implement write and end functions
 Dominode.prototype.write = function(data) {
-  var compiled = plates.bind(this.template, data)
-  var text = this.renderFragment(compiled)
+  var compiled = this.render(data)
+  var text = this.createFragment(compiled)
   this.selector.appendChild(text)
 }
 

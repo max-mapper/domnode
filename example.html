@@ -19,7 +19,7 @@
         }
         util.inherits(ExampleReadStream, stream.Stream)
         
-        var list = dominode('.list', '<div id="number"></div>')
+        var list = dominode('.list', '<div>{{number}}</div>')
         var readStream = new ExampleReadStream()
         readStream.pipe(list)
       })

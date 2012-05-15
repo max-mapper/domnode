@@ -26,7 +26,7 @@ the idea behind dominode is to hook up various I/O sources that are commonly use
 
 you could implement a Stream that will `emit` once for every topping and pipe that stream to a dominode instance that knows how to render JSON data into the DOM using an HTML template
 
-currently dominode is using the [plates](https://github.com/flatiron/plates) templating library which lets you bind JSON data to HTML, but it's easy to override plates and hook up your own client side templater
+currently dominode is using the [mustache](https://github.com/janl/mustache.js) templating library which lets you bind JSON data to HTML, but it's easy to override mustache and hook up your own client side templater
 
 ## example
 
@@ -51,6 +51,10 @@ currently dominode is using the [plates](https://github.com/flatiron/plates) tem
     readStream.write({number: 2})
     readStream.write({number: 3})
 
+## browserify usage
+
+`browserify -r events -r buffer -r stream -r util -r mustache -o bundle.js`
+
 ## roadmap
 
  - implement common stream wrappers:
@@ -61,6 +65,7 @@ currently dominode is using the [plates](https://github.com/flatiron/plates) tem
    - webworkers
    - webRTC
    - mouse/touch events
+   - setInterval
  - examples using a few different templating libraries
  - examples using MVVM style "cascading dominodes" (the pun is strong with this one)
 
