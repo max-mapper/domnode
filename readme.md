@@ -57,7 +57,7 @@ currently dominode is using the [plates](https://github.com/flatiron/plates) tem
    - XHR (naive implementation [here](https://github.com/maxogden/streaming-xhr-example/blob/master/attachments/streaming-xhr.js#L78))
    - websockets (done already by @dominictarr as [BrowserStream](https://github.com/dominictarr/browser-stream))
    - indexeddb/pouchdb
-   - FileReader
+   - FileReader (implemented [here](https://github.com/wookiehangover/dominode-filestream))
    - webworkers
    - webRTC
    - mouse/touch events
