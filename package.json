@@ -1,7 +1,7 @@
 {
     "name" : "dominode.js",
     "description" : "node style streams for the DOM",
-    "version" : "0.0.2",
+    "version" : "0.0.3",
     "repository" : {
         "type" : "git",
         "url" : "git://github.com/maxogden/dominode.git"
