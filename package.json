@@ -1,10 +1,10 @@
 {
-    "name" : "dominode.js",
+    "name" : "domnode",
     "description" : "node style streams for the DOM",
     "version" : "0.0.3",
     "repository" : {
         "type" : "git",
-        "url" : "git://github.com/maxogden/dominode.git"
+        "url" : "git://github.com/maxogden/domnode.git"
     },
     "keywords" : [
         "templating",
