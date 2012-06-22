@@ -1,22 +1,15 @@
 {
     "name" : "domnode",
-    "description" : "node style streams for the DOM",
+    "description" : "node style streams for HTML5 APIs",
     "version" : "0.0.3",
     "repository" : {
         "type" : "git",
         "url" : "git://github.com/maxogden/domnode.git"
     },
     "keywords" : [
-        "templating",
-        "dom",
         "stream",
-        "mvc",
-        "framework",
         "pipe"
     ],
-    "dependencies": {
-      "mustache": "0.4.0"
-    },
     "license" : "MIT",
     "author" : {
         "name" : "Max Ogden",
