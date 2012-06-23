@@ -3,7 +3,7 @@ var ecstatic = require('ecstatic')(__dirname);
 var shoe = require('shoe');
 
 var server = http.createServer(ecstatic);
-server.listen(9999);
+server.listen(8000);
 
 var clients = []
 
@@ -26,4 +26,4 @@ var view = shoe(function (stream) {
 });
 view.install(server, '/view');
 
-console.log('open localhost:9999 to view and localhost:9999/broadcast.html to broadcast (from a webrtc enabled browser like Canary or Firefox)')
+console.log('open localhost:8000 to view and localhost:8000/broadcast.html to broadcast (from a webrtc enabled browser like Canary or Firefox)')

@@ -3389,18 +3389,18 @@ MediaStream.prototype.onVideoPlay = function() {
   var video = this.video
   if (!isNaN(video.duration)) {
     this.canvas = this.createHiddenCanvas()
-    setInterval(this.captureVideo.bind(this), 33)
+    setInterval(this.captureVideo.bind(this), 1)
   } else {
     setTimeout(this.onVideoPlay.bind(this), 100)
   }
 }
 
 MediaStream.prototype.captureVideo = function() {
-  var canvas = this.canvas
-  canvas.width = this.video.videoWidth;
-  canvas.height = this.video.videoHeight;
-  canvas.getContext('2d').drawImage(this.video, 0, 0)
-  this.emit('data', canvas.toDataURL('image/webp'))
+  // var before = new Date()
+  this.canvasContext.drawImage(this.video, 0, 0)
+  var uri = this.canvas.toDataURL('image/webp')
+  // console.log(new Date() - before)
+  this.emit('data', uri)
 }
 
 MediaStream.prototype.createHiddenVideo = function() {
@@ -3412,18 +3412,22 @@ MediaStream.prototype.createHiddenVideo = function() {
 }
 
 MediaStream.prototype.createHiddenCanvas = function() {
-  var canvasElement = document.createElement("canvas")
-  canvasElement.style.display = "none"
-  document.querySelector('body').appendChild(canvasElement)
-  return canvasElement
+  this.canvas = document.createElement("canvas")
+  this.canvas.style.display = "none"
+  document.querySelector('body').appendChild(this.canvas)
+  this.canvas.width = this.video.videoWidth;
+  this.canvas.height = this.video.videoHeight;
+  this.canvasContext = this.canvas.getContext('2d')
+  return this.canvas
 }
 });
 
-require.define("/client.js", function (require, module, exports, __dirname, __filename) {
+require.define("/broadcast.js", function (require, module, exports, __dirname, __filename) {
     var shoe = require('shoe')
-var mediastream = require('mediastream')
+mediastream = require('mediastream')
 var broadcast = shoe('/broadcast')
-mediastream({video: true}).pipe(broadcast)
+window.ms = mediastream({video: true})
+ms.pipe(broadcast)
 
 });
-require("/client.js");
+require("/broadcast.js");
