@@ -3,7 +3,7 @@
 
 **still alpha/work in progress**
 
-you want to learn node's core APIs but you're stuck on the client side? no problemo! domnode uses javascript _verbatim and unchanged_ directly from node to give you a way to elegantly stream data into your web app.
+you want to learn node but you're stuck on the client side? no problemo! domnode uses javascript _verbatim and unchanged_ directly from node to give you a way to elegantly stream data in and out of your web app.
 
 ## philosophy
 
@@ -15,17 +15,20 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 
 ## components
 
+- (websockets)[https://github.com/dominictarr/browser-stream]
+- (FileReader)[https://github.com/wookiehangover/dominode-filestream]
+- (web workers)[https://github.com/maxogden/domnode-webworker]
+- (webRTC/getUserMedia)[https://github.com/maxogden/domnode-usermedia]
+
+todo:
+
 - XHR (naive implementation [here](https://github.com/maxogden/streaming-xhr-example/blob/master/attachments/streaming-xhr.js#L78))
-- websockets (done already by @dominictarr as [BrowserStream](https://github.com/dominictarr/browser-stream))
 - indexeddb/pouchdb
-- FileReader (implemented [here](https://github.com/wookiehangover/dominode-filestream))
-- webworkers
-- webRTC
 - mouse/touch events
 - setInterval
 
-## browserify usage
+## to generate domnode-bundle.js using browserify:
 
-`browserify -r events -r buffer -r stream -r util -o bundle.js`
+    browserify -r events -r buffer -r stream -r util -o domnode-bundle.js
 
 MIT LICENSE
