@@ -15,14 +15,15 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 
 ## components
 
+- [XHR](https://github.com/substack/http-browserify)
 - [websockets](https://github.com/dominictarr/browser-stream)
 - [FileReader](https://github.com/wookiehangover/dominode-filestream)
 - [web workers](https://github.com/maxogden/domnode-webworker)
 - [webRTC/getUserMedia](https://github.com/maxogden/domnode-usermedia)
 
-todo:
+todo/works in progress:
 
-- XHR (naive implementation [here](https://github.com/maxogden/streaming-xhr-example/blob/master/attachments/streaming-xhr.js#L78))
+- [[https://github.com/CrabDude/fs-browserify]]
 - indexeddb/pouchdb
 - mouse/touch events
 - setInterval
