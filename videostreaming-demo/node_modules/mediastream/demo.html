@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="domnode-bundle.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+    <title>DOMNode getUserMedia</title>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script type='text/javascript'>
+      var media = new MediaStream({video : true})
+      media.on('data', function(data) {
+        console.log('video stream data', data)
+      })
+      media.on('error', function(err) {
+        console.log('error!', err)
+      })
+    </script>
+  </body>
+</html>

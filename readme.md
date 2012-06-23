@@ -23,7 +23,7 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 
 todo/works in progress:
 
-- [[https://github.com/CrabDude/fs-browserify]]
+- https://github.com/CrabDude/fs-browserify
 - indexeddb/pouchdb
 - mouse/touch events
 - setInterval
