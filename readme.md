@@ -15,10 +15,10 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 
 ## components
 
-- (websockets)[https://github.com/dominictarr/browser-stream]
-- (FileReader)[https://github.com/wookiehangover/dominode-filestream]
-- (web workers)[https://github.com/maxogden/domnode-webworker]
-- (webRTC/getUserMedia)[https://github.com/maxogden/domnode-usermedia]
+- [websockets](https://github.com/dominictarr/browser-stream)
+- [FileReader](https://github.com/wookiehangover/dominode-filestream)
+- [web workers](https://github.com/maxogden/domnode-webworker)
+- [webRTC/getUserMedia](https://github.com/maxogden/domnode-usermedia)
 
 todo:
 
