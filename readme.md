@@ -20,6 +20,7 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 - [FileReader](https://github.com/wookiehangover/dominode-filestream)
 - [web workers](https://github.com/maxogden/domnode-webworker)
 - [webRTC/getUserMedia](https://github.com/maxogden/domnode-usermedia)
+- [geolocation watchPosition](https://github.com/maxogden/domnode-geolocation)
 
 todo/works in progress:
 
@@ -27,6 +28,8 @@ todo/works in progress:
 - indexeddb/pouchdb
 - mouse/touch events
 - setInterval
+- web audio
+- device orientation
 
 ## to generate domnode-bundle.js using browserify:
 
