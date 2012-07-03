@@ -3359,10 +3359,12 @@ function MediaStream(options) {
   this.readable = true
   var getUserMedia = me.getGetUserMedia()
   if (!getUserMedia) return console.log({"error": "getUserMedia not supported in this browser"})
-  navigator.webkitGetUserMedia(options,
+  getUserMedia(options,
     function(stream) {
       var video = me.video = me.createHiddenVideo()
-      video.src = window.webkitURL.createObjectURL(stream)
+      var URL = me.URL()
+      if (!URL) return console.log({"error":"createObjectURL not supported in this browser"})
+      video.src = URL.createObjectURL(stream)
       video.play()
     },
     function(err) {
@@ -3382,6 +3384,12 @@ module.exports.MediaStream = MediaStream
 MediaStream.prototype.getGetUserMedia = function() {
   if (navigator.getUserMedia) return navigator.getUserMedia
   if (navigator.webkitGetUserMedia) return navigator.webkitGetUserMedia
+  return false
+}
+
+MediaStream.prototype.URL = function() {
+  if (window.URL) return window.URL
+  if (window.webkitURL) return window.webkitURL
   return false
 }
 
