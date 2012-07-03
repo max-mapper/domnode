@@ -17,7 +17,7 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 
 - [XHR](https://github.com/substack/http-browserify)
 - [websockets](https://github.com/dominictarr/browser-stream)
-- [FileReader](https://github.com/wookiehangover/dominode-filestream)
+- [FileReader](https://github.com/wookiehangover/domnode-filestream)
 - [web workers](https://github.com/maxogden/domnode-webworker)
 - [webRTC/getUserMedia](https://github.com/maxogden/domnode-usermedia)
 - [geolocation watchPosition](https://github.com/maxogden/domnode-geolocation)
