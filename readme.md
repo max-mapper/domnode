@@ -16,11 +16,15 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 ## components
 
 - [XHR](https://github.com/substack/http-browserify)
-- [websockets](https://github.com/dominictarr/browser-stream)
+- [websockets](https://github.com/maxogden/websocket-stream)
 - [FileReader](https://github.com/wookiehangover/domnode-filestream)
 - [web workers](https://github.com/maxogden/domnode-webworker)
 - [webRTC/getUserMedia](https://github.com/maxogden/domnode-usermedia)
 - [geolocation watchPosition](https://github.com/maxogden/domnode-geolocation)
+- [dom elements](https://github.com/chrisdickinson/domnode-dom)
+- [server-sent events (SSE)](https://github.com/chrisdickinson/sse-stream)
+- [data channel (webRTC)](https://github.com/Raynos/data-channel)
+- [sockets (like websockets but with cross browser fallbacks)](https://github.com/substack/shoe)
 
 todo/works in progress:
 
