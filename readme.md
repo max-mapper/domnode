@@ -1,4 +1,4 @@
-# domnode - node's evented API for HTML5
+ # domnode - node's evented API for HTML5
 # domnode - node point browser
 
 **still alpha/work in progress**
@@ -21,10 +21,15 @@ the major goal of this library is to avoid reinventing the wheel when it comes t
 - [web workers](https://github.com/maxogden/domnode-webworker)
 - [webRTC/getUserMedia](https://github.com/maxogden/domnode-usermedia)
 - [geolocation watchPosition](https://github.com/maxogden/domnode-geolocation)
-- [dom elements](https://github.com/chrisdickinson/domnode-dom)
+- [DOM element events](https://github.com/chrisdickinson/domnode-dom)
 - [server-sent events (SSE)](https://github.com/chrisdickinson/sse-stream)
 - [data channel (webRTC)](https://github.com/Raynos/data-channel)
 - [sockets (like websockets but with cross browser fallbacks)](https://github.com/substack/shoe)
+- [WebGL Textures (WIP)](https://github.com/chrisdickinson/texture.js#texturecreatewritestreamdx-dy-dw-dh---texturestream)
+- [Mouse Drag](https://github.com/chrisdickinson/drag-stream)
+- [Color Picker](https://github.com/chrisdickinson/pick-at-it)
+- [PNG Chunks (works in browser if you shim in a good buffer library)](https://github.com/chrisdickinson/chunky-rice)
+
 
 todo/works in progress:
 
